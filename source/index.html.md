@@ -3,13 +3,14 @@ title: API Reference
 
 language_tabs: # must be one of https://git.io/vQNgJ
   - shell
-  - ruby
+  - java
   - python
+  - swift
+  - go
   - javascript
 
 toc_footers:
   - <a href='#'>Sign Up for a Developer Key</a>
-  - <a href='https://github.com/slatedocs/slate'>Documentation Powered by Slate</a>
 
 includes:
   - errors
@@ -20,85 +21,136 @@ code_clipboard: true
 
 meta:
   - name: description
-    content: Documentation for the Kittn API
+    content: Documentation for the YO2 Retail API
 ---
 
 # Introduction
 
-Welcome to the Kittn API! You can use our API to access Kittn API endpoints, which can get information on various cats, kittens, and breeds in our database.
+Welcome to the `YO2-Retail` API! You can use our API to access any `YO2-Retail` API endpoints, which can get information on various products, payments, and cash transactions performed by the customer.
 
-We have language bindings in Shell, Ruby, Python, and JavaScript! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
+We have language bindings in Shell, Java, Python, Swift, Go, and JavaScript! You can view code examples in the dark area to the right, and you can switch the programming language of the examples with the tabs in the top right.
 
-This example API documentation page was created with [Slate](https://github.com/slatedocs/slate). Feel free to edit it and use it as a base for your own API's documentation.
+# Retail Reader API
 
-# Authentication
+## Get Payment Transaction Details
 
-> To authorize, use this code:
+```java
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
 
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
+Client client = ClientBuilder.newClient();
+Response response = client.target(
+  "https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?fromdate=2022-01-01&todate=2022-02-03&page=0&rows=100")
+  .request(MediaType.TEXT_PLAIN_TYPE)
+  .header("Authorization", "Bearer [token]")
+  .get();
+System.out.println("status: " + response.getStatus());
+System.out.println("headers: " + response.getHeaders());
+System.out.println("body: "+ response.readEntity(String.class));
 ```
 
 ```python
-import kittn
+import requests
 
-api = kittn.authorize('meowmeowmeow')
+headers = {
+  'Authorization': 'Bearer [token]'
+}
+
+response = requests.get(
+  'https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?fromdate=2022-01-01&todate=2022-02-03&page=0&rows=100',
+  headers=headers
+)
+
+print(response.status_code)
+print(response.headers)
+print(response.text)
 ```
 
 ```shell
-# With shell, you can just pass the correct header with each request
-curl "api_endpoint_here" \
-  -H "Authorization: meowmeowmeow"
+curl "https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?fromdate=2022-01-01&todate=2022-02-03&page=0&rows=100" \
+  -H "Authorization: [token]" -H "Content-Type: application/json" -H "Accept: application/json"
+```
+
+```swift
+import Foundation
+
+let url = URL(string: "https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?fromdate=2022-01-01&todate=2022-02-03&page=0&rows=100")!
+var request = URLRequest(url: url)
+request.addValue("Bearer [token]", forHTTPHeaderField: "Authorization")
+
+let task = URLSession.shared.dataTask(with: request) {data, response, error in
+  if let response = response {
+    print(response)
+
+    if let data = data, let body = String(data: data, encoding: .utf8) {
+      print(body)
+    }
+  } else {
+    print(error ?? "Unknown error")
+  }
+}
+
+task.resume()
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+)
+
+func main() {
+	client := &http.Client{}
+
+	req, _ := http.NewRequest(
+    "GET",
+    "https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?fromdate=2022-01-01&todate=2022-02-03&page=0&rows=100",
+    nil,
+  )
+
+	req.Header.Add("Authorization", "Bearer [token]")
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		fmt.Println("Errored when sending request to the server")
+		fmt.Println(err)
+		return
+	}
+
+	defer resp.Body.Close()
+	resp_body, _ := ioutil.ReadAll(resp.Body)
+
+	fmt.Println(resp.Status)
+	fmt.Println(resp.Header)
+	fmt.Println(string(resp_body))
+}
 ```
 
 ```javascript
-const kittn = require('kittn');
+const request = new XMLHttpRequest();
 
-let api = kittn.authorize('meowmeowmeow');
-```
+request.open(
+  "GET",
+  "https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?fromdate=2022-01-01&todate=2022-02-03&page=0&rows=100"
+);
+request.setRequestHeader("Authorization", "Bearer [token]");
 
-> Make sure to replace `meowmeowmeow` with your API key.
+request.onreadystatechange = function () {
+  if (this.readyState === 4) {
+    console.log("Status:", this.status);
+    console.log("Headers:", this.getAllResponseHeaders());
+    console.log("Body:", this.responseText);
+  }
+};
 
-Kittn uses API keys to allow access to the API. You can register a new Kittn API key at our [developer portal](http://example.com/developers).
-
-Kittn expects for the API key to be included in all API requests to the server in a header that looks like the following:
-
-`Authorization: meowmeowmeow`
-
-<aside class="notice">
-You must replace <code>meowmeowmeow</code> with your personal API key.
-</aside>
-
-# Kittens
-
-## Get All Kittens
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get()
-```
-
-```shell
-curl "http://example.com/api/kittens" \
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let kittens = api.kittens.get();
+request.send();
 ```
 
 > The above command returns JSON structured like this:
@@ -106,140 +158,318 @@ let kittens = api.kittens.get();
 ```json
 [
   {
-    "id": 1,
-    "name": "Fluffums",
-    "breed": "calico",
-    "fluffiness": 6,
-    "cuteness": 7
+    "source": "S02",
+    "sourcedesc": "GIFT",
+    "purpose": "P200",
+    "status": 0,
+    "transactionrefno": "005222478403624711",
+    "transactiondate": "2022-01-24T08:06:10.129",
+    "transactiontype": "SD",
+    "agentlocationid": 784101,
+    "agentlocationname": "AL WAHDA",
+    "agentrefno": "6574575544",
+    "amountinsettlmentccy": 500,
+    "amountintoccy": 500,
+    "createdby": "786000750",
+    "createdon": "2022-01-24T08:06:10.128",
+    "customeraddress": "ALWAHDA STREET 1",
+    "customercategory": 2,
+    "customerfirstname": "SFC ALWAHDA",
+    "customeridname": "SFC ALWAHDA",
+    "customeridno": "32423487",
+    "customeridtype": "5",
+    "customeridvalidthru": "2023-07-31T06:43:28",
+    "customerlastname": "",
+    "customermiddlename": "",
+    "customermobileno": "",
+    "customerno": "7",
+    "customerremarks": "142345",
+    "exchangerate": 1,
+    "fromccycode": "AED",
+    "toccycode": "AED",
+    "invoicenumber": "78410022000000000365",
+    "issuedon": "2022-01-24T08:06:10.128",
+    "merchantid": "056592",
+    "merchantname": "SFC",
+    "transactionamount": 500,
+    "totalcharges": 0,
+    "totaltransactionamount": 500,
+    "totalvatamount": 0,
+    "othercharges": 0,
+    "paymentmode": "CS",
+    "productgroupname": "CASH COLLECTION",
+    "productid": "5",
+    "productname": "CASH COLLECTION",
+    "purposedesc": "AIR TRANSPORT",
+    "ratesessionid": "123123",
+    "serviceid": "967382",
+    "servicename": "string",
+    "serviceproviderid": "784100",
+    "serviceprovidername": "ABC",
+    "settlementccy": "AED"
   },
   {
-    "id": 2,
-    "name": "Max",
-    "breed": "unknown",
-    "fluffiness": 5,
-    "cuteness": 10
+    "source": "S02",
+    "sourcedesc": "GIFT",
+    "purpose": "P200",
+    "status": 0,
+    "transactionrefno": "005222478407250521",
+    "transactiondate": "2022-01-24T08:06:51.39",
+    "transactiontype": "SD",
+    "agentlocationid": 784101,
+    "agentlocationname": "AL WAHDA",
+    "agentrefno": "6574575544",
+    "amountinsettlmentccy": 500,
+    "amountintoccy": 500,
+    "createdby": "786000750",
+    "createdon": "2022-01-24T08:06:51.39",
+    "customeraddress": "ALWAHDA STREET 1",
+    "customercategory": 2,
+    "customerfirstname": "SFC ALWAHDA",
+    "customeridname": "SFC ALWAHDA",
+    "customeridno": "32423487",
+    "customeridtype": "5",
+    "customeridvalidthru": "2023-07-31T06:43:28",
+    "customerlastname": "",
+    "customermiddlename": "",
+    "customermobileno": "",
+    "customerno": "7",
+    "customerremarks": "142345",
+    "exchangerate": 1,
+    "fromccycode": "AED",
+    "toccycode": "AED",
+    "invoicenumber": "78410022000000000367",
+    "issuedon": "2022-01-24T08:06:51.39",
+    "merchantid": "056592",
+    "merchantname": "SFC",
+    "transactionamount": 500,
+    "totalcharges": 0,
+    "totaltransactionamount": 500,
+    "totalvatamount": 0,
+    "othercharges": 0,
+    "paymentmode": "CS",
+    "productgroupname": "CASH COLLECTION",
+    "productid": "5",
+    "productname": "CASH COLLECTION",
+    "purposedesc": "AIR TRANSPORT",
+    "ratesessionid": "123123",
+    "serviceid": "967382",
+    "servicename": "string",
+    "serviceproviderid": "784100",
+    "serviceprovidername": "ABC",
+    "settlementccy": "AED"
   }
 ]
 ```
 
-This endpoint retrieves all kittens.
+This endpoint retrieves all payment transaction details.
 
 ### HTTP Request
 
-`GET http://example.com/api/kittens`
+`GET https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails`
 
 ### Query Parameters
 
-Parameter | Default | Description
---------- | ------- | -----------
-include_cats | false | If set to true, the result will also include cats.
-available | true | If set to false, the result will include kittens that have already been adopted.
+| Parameter | Required | Description                                                            |
+| --------- | -------- | ---------------------------------------------------------------------- |
+| fromdate  | No       | If set, the result will be filtered by the starting date.              |
+| todate    | No       | If set, the result will be filtered by the end date.                   |
+| rows      | No       | Limit the number of records being displayed per page. Default to 1000. |
+| txnrefno  | No       | If set, result will be filtered by the transaction ref number.         |
 
-<aside class="success">
-Remember — a happy kitten is an authenticated kitten!
+<aside class="warning">
+Remember — you must replace `[token]` with your API key you got when you subscribe to our API plan.
 </aside>
 
-## Get a Specific Kitten
+## Get a Specific Transaction Ref.No
 
-```ruby
-require 'kittn'
+```java
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.MediaType;
 
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.get(2)
+Client client = ClientBuilder.newClient();
+Response response = client.target(
+  "https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?txnrefno=005222478403624711")
+  .request(MediaType.TEXT_PLAIN_TYPE)
+  .header("Authorization", "Bearer [token]")
+  .get();
+System.out.println("status: " + response.getStatus());
+System.out.println("headers: " + response.getHeaders());
+System.out.println("body: "+ response.readEntity(String.class));
 ```
 
 ```python
-import kittn
+import requests
 
-api = kittn.authorize('meowmeowmeow')
-api.kittens.get(2)
+headers = {
+  'Authorization': 'Bearer [token]'
+}
+
+response = requests.get(
+  'https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?txnrefno=005222478403624711',
+  headers=headers
+)
+
+print(response.status_code)
+print(response.headers)
+print(response.text)
 ```
 
 ```shell
-curl "http://example.com/api/kittens/2" \
-  -H "Authorization: meowmeowmeow"
+curl "https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?txnrefno=005222478403624711" \
+  -H "Authorization: [token]" -H "Content-Type: application/json" -H "Accept: application/json"
+```
+
+```swift
+import Foundation
+
+let url = URL(string: "https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?txnrefno=005222478403624711")!
+var request = URLRequest(url: url)
+request.addValue("Bearer [token]", forHTTPHeaderField: "Authorization")
+
+let task = URLSession.shared.dataTask(with: request) {data, response, error in
+  if let response = response {
+    print(response)
+
+    if let data = data, let body = String(data: data, encoding: .utf8) {
+      print(body)
+    }
+  } else {
+    print(error ?? "Unknown error")
+  }
+}
+
+task.resume()
+```
+
+```go
+package main
+
+import (
+	"fmt"
+	"io/ioutil"
+	"net/http"
+)
+
+func main() {
+	client := &http.Client{}
+
+	req, _ := http.NewRequest(
+    "GET",
+    "https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?txnrefno=005222478403624711",
+    nil,
+  )
+
+	req.Header.Add("Authorization", "Bearer [token]")
+
+	resp, err := client.Do(req)
+
+	if err != nil {
+		fmt.Println("Errored when sending request to the server")
+		fmt.Println(err)
+		return
+	}
+
+	defer resp.Body.Close()
+	resp_body, _ := ioutil.ReadAll(resp.Body)
+
+	fmt.Println(resp.Status)
+	fmt.Println(resp.Header)
+	fmt.Println(string(resp_body))
+}
 ```
 
 ```javascript
-const kittn = require('kittn');
+const request = new XMLHttpRequest();
 
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.get(2);
+request.open(
+  "GET",
+  "https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?txnrefno=005222478403624711"
+);
+request.setRequestHeader("Authorization", "Bearer [token]");
+
+request.onreadystatechange = function () {
+  if (this.readyState === 4) {
+    console.log("Status:", this.status);
+    console.log("Headers:", this.getAllResponseHeaders());
+    console.log("Body:", this.responseText);
+  }
+};
+
+request.send();
 ```
 
 > The above command returns JSON structured like this:
 
 ```json
-{
-  "id": 2,
-  "name": "Max",
-  "breed": "unknown",
-  "fluffiness": 5,
-  "cuteness": 10
-}
+[
+  {
+    "source": "S02",
+    "sourcedesc": "GIFT",
+    "purpose": "P200",
+    "status": 0,
+    "transactionrefno": "005222478403624711",
+    "transactiondate": "2022-01-24T08:06:10.129",
+    "transactiontype": "SD",
+    "agentlocationid": 784101,
+    "agentlocationname": "AL WAHDA",
+    "agentrefno": "6574575544",
+    "amountinsettlmentccy": 500,
+    "amountintoccy": 500,
+    "createdby": "786000750",
+    "createdon": "2022-01-24T08:06:10.128",
+    "customeraddress": "ALWAHDA STREET 1",
+    "customercategory": 2,
+    "customerfirstname": "SFC ALWAHDA",
+    "customeridname": "SFC ALWAHDA",
+    "customeridno": "32423487",
+    "customeridtype": "5",
+    "customeridvalidthru": "2023-07-31T06:43:28",
+    "customerlastname": "",
+    "customermiddlename": "",
+    "customermobileno": "",
+    "customerno": "7",
+    "customerremarks": "142345",
+    "exchangerate": 1,
+    "fromccycode": "AED",
+    "toccycode": "AED",
+    "invoicenumber": "78410022000000000365",
+    "issuedon": "2022-01-24T08:06:10.128",
+    "merchantid": "056592",
+    "merchantname": "SFC",
+    "transactionamount": 500,
+    "totalcharges": 0,
+    "totaltransactionamount": 500,
+    "totalvatamount": 0,
+    "othercharges": 0,
+    "paymentmode": "CS",
+    "productgroupname": "CASH COLLECTION",
+    "productid": "5",
+    "productname": "CASH COLLECTION",
+    "purposedesc": "AIR TRANSPORT",
+    "ratesessionid": "123123",
+    "serviceid": "967382",
+    "servicename": "string",
+    "serviceproviderid": "784100",
+    "serviceprovidername": "ABC",
+    "settlementccy": "AED"
+  }
+]
 ```
 
-This endpoint retrieves a specific kitten.
-
-<aside class="warning">Inside HTML code blocks like this one, you can't use Markdown, so use <code>&lt;code&gt;</code> blocks to denote code.</aside>
+This endpoint retrieves a specific transaction based on given transaction reference number.
 
 ### HTTP Request
 
-`GET http://example.com/kittens/<ID>`
+`GET https://yo2rdev.luluone.com/retail-reader/yo2/getPaymentTransactionDetails?txnrefno=<txnrefno>`
 
 ### URL Parameters
 
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to retrieve
+| Parameter | Description                 |
+| --------- | --------------------------- |
+| txnrefno  | The transaction ref number. |
 
-## Delete a Specific Kitten
-
-```ruby
-require 'kittn'
-
-api = Kittn::APIClient.authorize!('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```python
-import kittn
-
-api = kittn.authorize('meowmeowmeow')
-api.kittens.delete(2)
-```
-
-```shell
-curl "http://example.com/api/kittens/2" \
-  -X DELETE \
-  -H "Authorization: meowmeowmeow"
-```
-
-```javascript
-const kittn = require('kittn');
-
-let api = kittn.authorize('meowmeowmeow');
-let max = api.kittens.delete(2);
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "id": 2,
-  "deleted" : ":("
-}
-```
-
-This endpoint deletes a specific kitten.
-
-### HTTP Request
-
-`DELETE http://example.com/kittens/<ID>`
-
-### URL Parameters
-
-Parameter | Description
---------- | -----------
-ID | The ID of the kitten to delete
-
+<aside class="warning">Remember — you must replace `[token]` with your API key you got when you subscribe to our API plan.</aside>
